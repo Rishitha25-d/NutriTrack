@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriTrack AI — Smart Nutrition Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --green: #1a9e5c;
+  --green-light: #e6f7ef;
+  --green-mid: #4ade80;
+  --amber: #f59e0b;
+  --amber-light: #fef3c7;
+  --red: #ef4444;
+  --red-light: #fee2e2;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --purple: #8b5cf6;
+  --teal: #14b8a6;
+  --bg: #f8faf7;
+  --card: #ffffff;
+  --border: #e8ede8;
+  --text: #1a2e1a;
+  --muted: #6b7c6b;
+  --accent: #0d7a42;
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);overflow-x:hidden}
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(248,250,247,0.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{font-family:var(--font-display);font-size:1.4rem;font-weight:800;color:var(--green);display:flex;align-items:center;gap:8px;cursor:pointer}
+.nav-logo span{color:var(--text)}
+.nav-logo svg{width:28px;height:28px}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.9rem;font-weight:500;color:var(--muted);text-decoration:none;transition:.2s}
+.nav-links a:hover{color:var(--green)}
+.nav-cta{display:flex;gap:.75rem}
+.btn{font-family:var(--font-body);font-size:.875rem;font-weight:500;padding:.55rem 1.25rem;border-radius:8px;border:none;cursor:pointer;transition:all .2s}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--accent);transform:translateY(-1px)}
+.btn-lg{padding:.8rem 2rem;font-size:1rem;border-radius:10px}
+/* HERO */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-light);color:var(--green);font-size:.8rem;font-weight:600;padding:.35rem .85rem;border-radius:99px;margin-bottom:1.5rem;border:1px solid rgba(26,158,92,.2)}
+.hero h1{font-family:var(--font-display);font-size:clamp(2.8rem,6vw,5rem);font-weight:800;line-height:1.05;max-width:780px;margin:0 auto .75rem}
+.hero h1 em{font-style:normal;color:var(--green)}
+.hero p{font-size:1.15rem;color:var(--muted);max-width:560px;margin:0 auto 2.5rem;line-height:1.7;font-weight:300}
+.hero-actions{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.hero-stats{display:flex;gap:3rem;justify-content:center;flex-wrap:wrap}
+.hero-stat{text-align:center}
+.hero-stat-num{font-family:var(--font-display);font-size:1.75rem;font-weight:800;color:var(--green)}
+.hero-stat-label{font-size:.8rem;color:var(--muted);margin-top:.1rem}
+/* BG blobs */
+.blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:.2;pointer-events:none}
+.blob-1{width:600px;height:600px;background:#4ade80;top:-100px;right:-200px}
+.blob-2{width:400px;height:400px;background:#86efac;bottom:0;left:-100px}
+/* DASHBOARD PREVIEW */
+.preview-section{padding:4rem 2rem;background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.section-label{text-align:center;font-family:var(--font-display);font-size:2rem;font-weight:700;margin-bottom:.5rem}
+.section-sub{text-align:center;color:var(--muted);font-size:.95rem;margin-bottom:3rem;font-weight:300}
+.dashboard-demo{max-width:1100px;margin:0 auto}
+/* TABS */
+.tab-bar{display:flex;gap:.5rem;margin-bottom:1.5rem;background:var(--bg);padding:4px;border-radius:12px;border:1px solid var(--border);width:fit-content}
+.tab{font-size:.85rem;font-weight:500;padding:.5rem 1rem;border-radius:8px;border:none;cursor:pointer;background:transparent;color:var(--muted);transition:.2s}
+.tab.active{background:#fff;color:var(--green);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+/* CARDS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:1.5rem}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;position:relative;overflow:hidden}
+.stat-card-label{font-size:.75rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.35rem}
+.stat-card-val{font-family:var(--font-display);font-size:1.8rem;font-weight:800;line-height:1}
+.stat-card-unit{font-size:.85rem;color:var(--muted);font-weight:400}
+.stat-card-bar{height:4px;border-radius:2px;background:var(--border);margin-top:.75rem;overflow:hidden}
+.stat-card-fill{height:100%;border-radius:2px;transition:.6s}
+.stat-card-sub{font-size:.75rem;color:var(--muted);margin-top:.4rem}
+/* CHART CARD */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem}
+.chart-title{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:1.25rem}
+.grid-2{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:1rem}
+.grid-2-equal{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+/* MACRO RING */
+.macro-ring-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%}
+.macro-legend{display:flex;flex-direction:column;gap:.5rem;margin-top:.75rem;width:100%}
+.legend-row{display:flex;align-items:center;gap:.5rem;font-size:.78rem}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.legend-label{color:var(--muted);flex:1}
+.legend-val{font-weight:600;color:var(--text)}
+/* FOOD LOG */
+.food-log{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem}
+.food-log-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem}
+.food-log-title{font-family:var(--font-display);font-size:1rem;font-weight:700}
+.food-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border)}
+.food-item:last-child{border-bottom:none}
+.food-emoji{width:36px;height:36px;background:var(--green-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.food-info{flex:1}
+.food-name{font-size:.88rem;font-weight:500}
+.food-time{font-size:.75rem;color:var(--muted)}
+.food-cal{font-family:var(--font-display);font-size:.9rem;font-weight:700;color:var(--green)}
+/* HEALTH SCORE */
+.health-score-card{background:linear-gradient(135deg,var(--green) 0%,#0d7a42 100%);border-radius:14px;padding:1.5rem;color:#fff;position:relative;overflow:hidden}
+.hs-label{font-size:.8rem;opacity:.8;font-weight:500;text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+.hs-score{font-family:var(--font-display);font-size:3.5rem;font-weight:800;line-height:1}
+.hs-max{font-size:1rem;opacity:.7}
+.hs-status{font-size:.85rem;opacity:.85;margin-top:.5rem}
+.hs-ring{position:absolute;right:-20px;bottom:-20px;width:120px;height:120px;border:15px solid rgba(255,255,255,.15);border-radius:50%}
+/* AI ASSISTANT */
+.ai-section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem}
+.ai-header{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem}
+.ai-dot{width:8px;height:8px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+.ai-title{font-family:var(--font-display);font-size:.95rem;font-weight:700}
+.ai-messages{display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;max-height:200px;overflow-y:auto}
+.msg{max-width:85%;padding:.65rem .9rem;border-radius:10px;font-size:.84rem;line-height:1.5}
+.msg-ai{background:var(--green-light);color:var(--text);border-radius:10px 10px 10px 0}
+.msg-user{background:var(--green);color:#fff;margin-left:auto;border-radius:10px 10px 0 10px}
+.ai-input{display:flex;gap:.5rem}
+.ai-input input{flex:1;border:1.5px solid var(--border);border-radius:8px;padding:.5rem .85rem;font-family:var(--font-body);font-size:.85rem;outline:none;background:var(--bg)}
+.ai-input input:focus{border-color:var(--green)}
+.ai-input button{background:var(--green);color:#fff;border:none;border-radius:8px;padding:.5rem .85rem;cursor:pointer;font-size:.85rem;font-weight:500;transition:.2s}
+.ai-input button:hover{background:var(--accent)}
+/* FEATURES */
+.features-section{padding:5rem 2rem;max-width:1100px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;margin-top:3rem}
+.feature-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.75rem;transition:.2s}
+.feature-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 8px 24px rgba(26,158,92,.08)}
+.feat-icon{width:44px;height:44px;border-radius:10px;background:var(--green-light);display:flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:1rem}
+.feat-title{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:.5rem}
+.feat-desc{font-size:.875rem;color:var(--muted);line-height:1.6;font-weight:300}
+/* SCANNER DEMO */
+.scanner-section{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:5rem 2rem}
+.scanner-demo{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center}
+.scanner-visual{background:var(--text);border-radius:20px;padding:1.5rem;aspect-ratio:9/16;max-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.scanner-frame{width:70%;aspect-ratio:1;border:2.5px solid var(--green-mid);border-radius:8px;position:relative}
+.scanner-frame::before,.scanner-frame::after{content:'';position:absolute;width:20px;height:20px;border-color:var(--green-mid);border-style:solid}
+.scanner-frame::before{top:-3px;left:-3px;border-width:3px 0 0 3px}
+.scanner-frame::after{bottom:-3px;right:-3px;border-width:0 3px 3px 0}
+.scan-line{position:absolute;left:5%;right:5%;height:2px;background:var(--green-mid);animation:scanLine 2s ease-in-out infinite;box-shadow:0 0 8px var(--green-mid)}
+@keyframes scanLine{0%{top:10%}100%{top:90%}}
+.scan-label{color:rgba(255,255,255,.6);font-size:.75rem;margin-top:1.5rem}
+.product-result{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.25rem;animation:fadeIn .5s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.product-header{display:flex;gap:.75rem;align-items:flex-start;margin-bottom:1rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.product-img{width:52px;height:52px;background:var(--amber-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0}
+.product-name{font-family:var(--font-display);font-size:1rem;font-weight:700}
+.product-brand{font-size:.8rem;color:var(--muted)}
+.health-badge{display:inline-flex;align-items:center;gap:4px;padding:.2rem .6rem;border-radius:99px;font-size:.72rem;font-weight:600;margin-top:.3rem}
+.badge-warn{background:var(--amber-light);color:#92400e}
+.badge-ok{background:var(--green-light);color:var(--accent)}
+.badge-bad{background:var(--red-light);color:#991b1b}
+.nutrients-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem}
+.nutrient-row{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;padding:.4rem .6rem;background:var(--bg);border-radius:6px}
+.nutrient-name{color:var(--muted)}
+.nutrient-val{font-weight:600;color:var(--text)}
+.nutrient-val.warn{color:var(--amber)}
+.nutrient-val.bad{color:var(--red)}
+.ai-suggestion{background:var(--green-light);border-radius:10px;padding:.85rem;font-size:.82rem;color:var(--text);line-height:1.5}
+.ai-suggestion strong{color:var(--green)}
+/* INDIAN FOODS */
+.indian-section{padding:5rem 2rem;background:var(--bg);max-width:1100px;margin:0 auto}
+.food-carousel{display:flex;gap:1rem;overflow-x:auto;padding-bottom:.5rem;scrollbar-width:none;margin-top:2rem}
+.food-carousel::-webkit-scrollbar{display:none}
+.food-chip{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;display:flex;flex-direction:column;align-items:center;gap:.5rem;min-width:110px;cursor:pointer;transition:.2s;text-decoration:none}
+.food-chip:hover{border-color:var(--green);transform:translateY(-2px)}
+.food-chip-emoji{font-size:1.8rem}
+.food-chip-name{font-size:.8rem;font-weight:500;color:var(--text);text-align:center}
+.food-chip-cal{font-size:.72rem;color:var(--muted)}
+.food-detail{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-top:1.5rem}
+.food-detail-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem}
+.food-detail-emoji{font-size:2.5rem}
+.food-detail-name{font-family:var(--font-display);font-size:1.4rem;font-weight:800}
+.food-detail-cal{font-size:.9rem;color:var(--muted)}
+.macros-bar{display:flex;height:8px;border-radius:4px;overflow:hidden;margin-bottom:.5rem}
+.macro-bar-protein{background:var(--blue)}
+.macro-bar-carb{background:var(--amber)}
+.macro-bar-fat{background:var(--red)}
+.macro-labels{display:flex;gap:1rem;font-size:.75rem}
+.macro-label{display:flex;align-items:center;gap:.3rem;color:var(--muted)}
+.macro-dot{width:8px;height:8px;border-radius:50%}
+/* CTA */
+.cta-section{background:var(--text);padding:5rem 2rem;text-align:center;color:#fff}
+.cta-title{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:800;margin-bottom:1rem}
+.cta-title em{font-style:normal;color:var(--green-mid)}
+.cta-sub{color:rgba(255,255,255,.65);font-size:1rem;max-width:480px;margin:0 auto 2rem;font-weight:300;line-height:1.7}
+/* FOOTER */
+footer{background:var(--text);border-top:1px solid rgba(255,255,255,.08);padding:2rem;text-align:center;color:rgba(255,255,255,.4);font-size:.8rem}
+/* MODAL OVERLAY */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:.2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--card);border-radius:20px;padding:2rem;max-width:440px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.12);transform:translateY(16px);transition:.2s}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal h2{font-family:var(--font-display);font-size:1.4rem;font-weight:800;margin-bottom:.35rem}
+.modal p{color:var(--muted);font-size:.875rem;margin-bottom:1.5rem;font-weight:300}
+.form-group{margin-bottom:1rem}
+.form-group label{font-size:.8rem;font-weight:600;color:var(--muted);display:block;margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.04em}
+.form-group input,.form-group select{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:.65rem .9rem;font-family:var(--font-body);font-size:.9rem;outline:none;background:#fff;transition:.2s}
+.form-group input:focus,.form-group select:focus{border-color:var(--green)}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.5rem}
+.modal-actions button{flex:1}
+.close-btn{position:absolute;top:1rem;right:1rem;background:var(--bg);border:1px solid var(--border);border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--muted)}
+/* PAGE VIEWS */
+.page{display:none}
+.page.active{display:block}
+/* LOADING */
+.loading{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--text);color:#fff;padding:.75rem 1.25rem;border-radius:10px;font-size:.875rem;z-index:300;transform:translateY(100px);opacity:0;transition:.3s;display:flex;align-items:center;gap:.5rem}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-dot{width:8px;height:8px;background:var(--green-mid);border-radius:50%}
+/* WATER TRACKER */
+.water-track{display:flex;gap:.35rem;align-items:flex-end;height:40px}
+.water-glass{width:18px;border-radius:3px 3px 6px 6px;transition:.3s;cursor:pointer}
+.water-glass.filled{background:var(--blue)}
+.water-glass.empty{background:var(--border)}
+/* STREAK */
+.streak-row{display:flex;gap:.3rem;flex-wrap:wrap}
+.streak-day{width:18px;height:18px;border-radius:4px;background:var(--border)}
+.streak-day.active{background:var(--green)}
+.streak-day.today{background:var(--green);box-shadow:0 0 0 2px rgba(26,158,92,.3)}
+/* ALERTS */
+.alert{border-radius:10px;padding:.75rem 1rem;font-size:.82rem;display:flex;align-items:flex-start;gap:.6rem;margin-bottom:.75rem;line-height:1.4}
+.alert-icon{font-size:1rem;flex-shrink:0}
+.alert-warn{background:var(--amber-light);color:#78350f}
+.alert-danger{background:var(--red-light);color:#7f1d1d}
+.alert-success{background:var(--green-light);color:var(--accent)}
+/* GOAL RING */
+.goal-rings{display:flex;gap:1.5rem;justify-content:center;align-items:center;padding:1.5rem 0}
+/* RESPONSIVE */
+@media(max-width:768px){
+  .grid-2{grid-template-columns:1fr}
+  .scanner-demo{grid-template-columns:1fr}
+  .scanner-visual{max-height:200px}
+  .nav-links{display:none}
+}
+/* TABS PANEL */
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* PROGRESS RING SVG */
+.ring-track{fill:none;stroke:var(--border);stroke-width:6}
+.ring-progress{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .8s ease;transform:rotate(-90deg);transform-origin:50% 50%}
+/* BMI */
+.bmi-bar{height:12px;border-radius:6px;background:linear-gradient(to right,var(--blue),var(--green),var(--amber),var(--red));position:relative;margin:1rem 0}
+.bmi-marker{width:3px;height:20px;background:var(--text);border-radius:2px;position:absolute;top:-4px;transition:.3s}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="mainNav">
+  <div class="nav-logo" onclick="showPage('landing')">
+    <svg viewBox="0 0 28 28" fill="none">
+      <circle cx="14" cy="14" r="14" fill="#1a9e5c"/>
+      <path d="M8 14.5c0-3.3 2.7-6 6-6s6 2.7 6 6-2.7 6-6 6-6-2.7-6-6z" fill="rgba(255,255,255,.2)"/>
+      <path d="M14 9v5l3 2" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M10 19.5c1-1.5 2.3-2.5 4-2.5s3 1 4 2.5" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    NutriTrack <span>AI</span>
+  </div>
+  <ul class="nav-links">
+  <li><a href="javascript:void(0)" onclick="smoothScroll('features')">Features</a></li>
+  <li><a href="javascript:void(0)" onclick="smoothScroll('scanner')">Scanner</a></li>
+  <li><a href="javascript:void(0)" onclick="smoothScroll('indian')">Indian Foods</a></li>
+  <li><a href="javascript:void(0)" onclick="showPage('pricing')">Pricing</a></li>
+</ul>
+  <div class="nav-cta">
+    <button class="btn btn-ghost" onclick="openModal('login')">Log in</button>
+    <button class="btn btn-primary" onclick="openModal('signup')">Get Started Free</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-dot"></span>
+  <span id="toastMsg">Food logged successfully!</span>
+</div>
+
+<!-- PAGES -->
+<div id="page-landing" class="page active">
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="hero-badge">✨ AI-Powered Nutrition Intelligence</div>
+  <h1>Track Every Bite,<br><em>Achieve Every Goal</em></h1>
+  <p>Smart nutrition tracking with AI that understands Indian food, reads barcodes, and learns from your habits — built for real people with real diets.</p>
+  <div class="hero-actions">
+    <button class="btn btn-primary btn-lg" onclick="openModal('signup')">Start Tracking Free</button>
+    <button class="btn btn-ghost btn-lg" onclick="showPage('dashboard')">View Dashboard Demo →</button>
+  </div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="hero-stat-num">50K+</div><div class="hero-stat-label">Indian Foods</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">98%</div><div class="hero-stat-label">Accuracy</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">2M+</div><div class="hero-stat-label">Meals Tracked</div></div>
+    <div class="hero-stat"><div class="hero-stat-num">4.9★</div><div class="hero-stat-label">User Rating</div></div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW -->
+<section class="preview-section" id="dashboard-preview">
+  <div class="section-label">Your Nutrition Command Center</div>
+  <div class="section-sub">Everything you need to understand what you're eating, at a glance.</div>
+
+  <div class="dashboard-demo">
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('today')">Today</button>
+      <button class="tab" onclick="switchTab('week')">This Week</button>
+      <button class="tab" onclick="switchTab('month')">Month</button>
+    </div>
+
+    <div id="tab-today" class="tab-panel active">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-label">Calories</div>
+          <div class="stat-card-val">1,284 <span class="stat-card-unit">/ 2,100</span></div>
+          <div class="stat-card-bar"><div class="stat-card-fill" style="width:61%;background:var(--green)"></div></div>
+          <div class="stat-card-sub">61% of daily goal</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Sugar</div>
+          <div class="stat-card-val" style="color:var(--amber)">38 <span class="stat-card-unit">g / 50g</span></div>
+          <div class="stat-card-bar"><div class="stat-card-fill" style="width:76%;background:var(--amber)"></div></div>
+          <div class="stat-card-sub" style="color:var(--amber)">⚠ Approaching limit</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Protein</div>
+          <div class="stat-card-val">72 <span class="stat-card-unit">g / 120g</span></div>
+          <div class="stat-card-bar"><div class="stat-card-fill" style="width:60%;background:var(--blue)"></div></div>
+          <div class="stat-card-sub">60% of daily goal</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Water</div>
+          <div class="stat-card-val">5 <span class="stat-card-unit">/ 8 glasses</span></div>
+          <div style="margin-top:.5rem">
+            <div class="water-track" id="waterTrack"></div>
+          </div>
+          <div class="stat-card-sub" style="margin-top:.35rem">Tap to log water 💧</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="chart-card">
+          <div class="chart-title">Calorie Intake — Today</div>
+          <canvas id="calorieChart" height="160"></canvas>
+        </div>
+        <div class="chart-card macro-ring-wrap">
+          <div class="chart-title" style="align-self:flex-start">Macros</div>
+          <canvas id="macroChart" width="140" height="140"></canvas>
+          <div class="macro-legend">
+            <div class="legend-row"><div class="legend-dot" style="background:var(--blue)"></div><span class="legend-label">Protein</span><span class="legend-val">72g</span></div>
+            <div class="legend-row"><div class="legend-dot" style="background:var(--amber)"></div><span class="legend-label">Carbs</span><span class="legend-val">165g</span></div>
+            <div class="legend-row"><div class="legend-dot" style="background:var(--red)"></div><span class="legend-label">Fats</span><span class="legend-val">38g</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2-equal">
+        <div>
+          <div class="health-score-card">
+            <div class="hs-label">Health Score</div>
+            <div class="hs-score">78 <span class="hs-max">/ 100</span></div>
+            <div class="hs-status">✅ Good — Stay on track!</div>
+            <div class="hs-ring"></div>
+          </div>
+          <div style="margin-top:1rem">
+            <div class="alert alert-warn"><span class="alert-icon">⚠️</span><span>Sugar intake nearing daily limit. Avoid sugary snacks after 3pm.</span></div>
+            <div class="alert alert-success"><span class="alert-icon">🎯</span><span>You've hit your protein goal 3 days in a row!</span></div>
+          </div>
+          <div class="chart-card" style="margin-top:1rem">
+            <div class="chart-title">Weekly Streak 🔥</div>
+            <div style="margin-bottom:.5rem;font-size:.8rem;color:var(--muted)">12 days active</div>
+            <div class="streak-row" id="streakRow"></div>
+          </div>
+        </div>
+        <div>
+          <div class="food-log">
+            <div class="food-log-header">
+              <div class="food-log-title">Today's Log</div>
+              <button class="btn btn-primary" style="font-size:.75rem;padding:.35rem .75rem" onclick="showAddFood()">+ Log Food</button>
+            </div>
+            <div class="food-item">
+              <div class="food-emoji">🥞</div>
+              <div class="food-info"><div class="food-name">Masala Dosa</div><div class="food-time">7:30 AM · Breakfast</div></div>
+              <div class="food-cal">210 kcal</div>
+            </div>
+            <div class="food-item">
+              <div class="food-emoji">🍛</div>
+              <div class="food-info"><div class="food-name">Dal Rice + Sabzi</div><div class="food-time">1:00 PM · Lunch</div></div>
+              <div class="food-cal">480 kcal</div>
+            </div>
+            <div class="food-item">
+              <div class="food-emoji">☕</div>
+              <div class="food-info"><div class="food-name">Chai + Biscuits</div><div class="food-time">4:00 PM · Snack</div></div>
+              <div class="food-cal">155 kcal</div>
+            </div>
+            <div class="food-item">
+              <div class="food-emoji">🍱</div>
+              <div class="food-info"><div class="food-name">Chicken Biryani</div><div class="food-time">8:00 PM · Dinner</div></div>
+              <div class="food-cal">439 kcal</div>
+            </div>
+          </div>
+          <div style="margin-top:1rem">
+            <div class="ai-section">
+              <div class="ai-header">
+                <div class="ai-dot"></div>
+                <div class="ai-title">NutriAI Assistant</div>
+                <span style="margin-left:auto;font-size:.72rem;color:var(--green);background:var(--green-light);padding:.15rem .5rem;border-radius:99px">Online</span>
+              </div>
+              <div class="ai-messages" id="aiMessages">
+                <div class="msg msg-ai">Hi Priya! 👋 Your sugar is at 76% today — try skipping the evening chai biscuits for a green tea instead.</div>
+                <div class="msg msg-user">What can I eat for a healthy dinner under 500 kcal?</div>
+                <div class="msg msg-ai" id="aiTyping">Let me think... <span class="loading"></span></div>
+              </div>
+              <div class="ai-input">
+                <input type="text" id="aiInput" placeholder="Ask about your nutrition...">
+                <button onclick="sendAIMessage()">Send</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-week" class="tab-panel">
+      <div class="chart-card">
+        <div class="chart-title">Weekly Calorie Overview</div>
+        <canvas id="weeklyChart" height="200"></canvas>
+      </div>
+    </div>
+
+    <div id="tab-month" class="tab-panel">
+      <div class="chart-card">
+        <div class="chart-title">Monthly Sugar Trend</div>
+        <canvas id="monthChart" height="200"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="padding:5rem 2rem;background:var(--bg)">
+  <div class="section-label">Everything You Need</div>
+  <div class="section-sub">From barcode scanning to AI meal planning — NutriTrack AI does it all.</div>
+  <div class="features-grid" style="max-width:1100px;margin:3rem auto 0">
+    <div class="feature-card">
+      <div class="feat-icon">📸</div>
+      <div class="feat-title">AI Food Recognition</div>
+      <div class="feat-desc">Upload a photo of your plate — our AI identifies every food item and estimates portions with Indian dish support.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📦</div>
+      <div class="feat-title">Barcode Scanner</div>
+      <div class="feat-desc">Scan packaged food barcodes in real-time to instantly fetch full nutrition facts, ingredients, and health ratings.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-title">AI Nutrition Coach</div>
+      <div class="feat-desc">Chat with your personal AI nutritionist for meal suggestions, health insights, and personalized diet plans.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🥘</div>
+      <div class="feat-title">Indian Food Database</div>
+      <div class="feat-desc">50,000+ Indian foods including regional dishes, home recipes, restaurant meals, and street food.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Smart Analytics</div>
+      <div class="feat-desc">Visualize your nutrition trends with beautiful charts. Track weekly patterns and monthly progress reports.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">⚠️</div>
+      <div class="feat-title">Health Alerts</div>
+      <div class="feat-desc">Real-time alerts for sugar spikes, sodium overload, nutrient deficiencies, and diabetes risk patterns.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🎯</div>
+      <div class="feat-title">Goal Modes</div>
+      <div class="feat-desc">Weight loss, muscle gain, Keto, Diabetes-friendly — tailored plans that adapt to your fitness goals.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">🏆</div>
+      <div class="feat-title">Streaks & Gamification</div>
+      <div class="feat-desc">Stay motivated with daily streaks, achievement badges, and points that make healthy eating addictive.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feat-icon">👨‍👩‍👧</div>
+      <div class="feat-title">Family Tracking</div>
+      <div class="feat-desc">Track nutrition for your entire family. Monitor kids' health, elderly diet needs, and shared meal planning.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SCANNER SECTION -->
+<section id="scanner" class="scanner-section">
+  <div class="section-label">Smart Barcode Scanner</div>
+  <div class="section-sub">Point your camera at any packaged food — get instant nutrition facts and health ratings.</div>
+  <div class="scanner-demo">
+    <div>
+      <div class="scanner-visual">
+        <div class="scanner-frame">
+          <div class="scan-line"></div>
+        </div>
+        <div class="scan-label">Scanning for barcode...</div>
+      </div>
+    </div>
+    <div>
+      <div class="product-result">
+        <div class="product-header">
+          <div class="product-img">🥛</div>
+          <div>
+            <div class="product-name">Amul Taaza Full Cream Milk</div>
+            <div class="product-brand">Amul Dairy · 200ml</div>
+            <span class="health-badge badge-ok">✅ Healthy Choice</span>
+          </div>
+        </div>
+        <div class="nutrients-grid">
+          <div class="nutrient-row"><span class="nutrient-name">Calories</span><span class="nutrient-val">126 kcal</span></div>
+          <div class="nutrient-row"><span class="nutrient-name">Protein</span><span class="nutrient-val">6.4g</span></div>
+          <div class="nutrient-row"><span class="nutrient-name">Sugar</span><span class="nutrient-val warn">9.4g ⚠</span></div>
+          <div class="nutrient-row"><span class="nutrient-name">Fat</span><span class="nutrient-val">7g</span></div>
+          <div class="nutrient-row"><span class="nutrient-name">Carbs</span><span class="nutrient-val">9.6g</span></div>
+          <div class="nutrient-row"><span class="nutrient-name">Sodium</span><span class="nutrient-val">64mg</span></div>
+        </div>
+        <div class="ai-suggestion">💡 <strong>NutriAI says:</strong> Great source of calcium! If you're watching sugar, try Amul Taaza Toned Milk — 30% less fat and sugar.</div>
+        <button class="btn btn-primary" style="width:100%;margin-top:.85rem" onclick="showToast('Amul Taaza logged — 126 kcal added!')">Log This Food</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INDIAN FOODS -->
+<section id="indian" style="padding:5rem 2rem;background:#fff;border-top:1px solid var(--border)">
+  <div style="max-width:1100px;margin:0 auto">
+    <div class="section-label">Built for Indian Kitchens 🇮🇳</div>
+    <div class="section-sub">From South Indian breakfast to North Indian dinner — every dish, every region, perfectly tracked.</div>
+    <div class="food-carousel" id="foodCarousel"></div>
+    <div class="food-detail" id="foodDetail"></div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing" style="padding:5rem 2rem;background:var(--bg)">
+  <div class="section-label">Simple Pricing</div>
+  <div class="section-sub">Start free, upgrade when you're ready for AI superpowers.</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:900px;margin:3rem auto 0">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Free</div>
+      <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:800;margin-bottom:.25rem">₹0<span style="font-size:1rem;font-weight:400;color:var(--muted)">/mo</span></div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;font-weight:300">Perfect for getting started</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:2rem">
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ 3 meals/day tracking</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Barcode scanner</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Basic analytics</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:var(--muted)">❌ AI assistant</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:var(--muted)">❌ Image recognition</li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%" onclick="openModal('signup')">Get Started</button>
+    </div>
+    <div style="background:var(--text);border-radius:16px;padding:2rem;position:relative;overflow:hidden">
+      <div style="position:absolute;top:1rem;right:1rem;background:var(--green);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:99px;text-transform:uppercase;letter-spacing:.06em">Most Popular</div>
+      <div style="font-size:.8rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Premium</div>
+      <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:800;margin-bottom:.25rem;color:#fff">₹299<span style="font-size:1rem;font-weight:400;color:rgba(255,255,255,.5)">/mo</span></div>
+      <p style="color:rgba(255,255,255,.5);font-size:.85rem;margin-bottom:1.5rem;font-weight:300">For serious health goals</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:2rem">
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:#fff">✅ Unlimited meal tracking</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:#fff">✅ AI Nutrition Assistant</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:#fff">✅ Image food recognition</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:#fff">✅ Weekly AI diet reports</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:#fff">✅ Family tracking (3 members)</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem;color:#fff">✅ Diabetes & Keto mode</li>
+      </ul>
+      <button class="btn btn-primary" style="width:100%" onclick="openModal('signup')">Start Free Trial</button>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:2rem">
+      <div style="font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Pro Family</div>
+      <div style="font-family:var(--font-display);font-size:2.5rem;font-weight:800;margin-bottom:.25rem">₹599<span style="font-size:1rem;font-weight:400;color:var(--muted)">/mo</span></div>
+      <p style="color:var(--muted);font-size:.85rem;margin-bottom:1.5rem;font-weight:300">For the whole family</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:.65rem;margin-bottom:2rem">
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Everything in Premium</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Up to 6 family members</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Allergy tracking</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Grocery AI suggestions</li>
+        <li style="font-size:.875rem;display:flex;gap:.5rem">✅ Priority support</li>
+      </ul>
+      <button class="btn btn-ghost" style="width:100%" onclick="openModal('signup')">Choose Plan</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-title">Start Eating <em>Smarter</em> Today</div>
+  <div class="cta-sub">Join thousands of Indians already tracking their nutrition with AI-powered precision. Free forever, no credit card needed.</div>
+  <button class="btn btn-primary btn-lg" onclick="openModal('signup')">Create Free Account →</button>
+</section>
+
+<footer>
+  <div style="color:rgba(255,255,255,.6);margin-bottom:.5rem;font-family:var(--font-display);font-weight:600">NutriTrack AI</div>
+  © 2025 NutriTrack AI · Built with ❤️ for India · Privacy · Terms · Contact
+</footer>
+</div><!-- end landing page -->
+
+<!-- DASHBOARD PAGE (standalone) -->
+<div id="page-dashboard" class="page">
+<div style="padding-top:64px;min-height:100vh;background:var(--bg)">
+  <div style="max-width:1200px;margin:0 auto;padding:2rem">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem">
+      <div>
+        <h1 style="font-family:var(--font-display);font-size:1.8rem;font-weight:800">Good evening, Priya 👋</h1>
+        <p style="color:var(--muted);font-size:.9rem">Wednesday, 21 May 2025 · Day 12 of your streak 🔥</p>
+      </div>
+      <div style="display:flex;gap:.75rem">
+        <button class="btn btn-ghost" onclick="showPage('landing')">← Back</button>
+        <button class="btn btn-primary" onclick="showAddFood()">+ Log Food</button>
+      </div>
+    </div>
+    <div style="padding:2rem;background:var(--card);border:1px solid var(--border);border-radius:16px;text-align:center;color:var(--muted)">
+      <div style="font-size:3rem;margin-bottom:.75rem">🚧</div>
+      <div style="font-family:var(--font-display);font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:.5rem">Full Dashboard Demo</div>
+      <p style="font-size:.9rem;max-width:440px;margin:0 auto .75rem;font-weight:300">The full interactive dashboard is shown on the landing page. This page would display in the authenticated app after login.</p>
+      <button class="btn btn-primary" onclick="showPage('landing');setTimeout(()=>{document.getElementById('dashboard-preview').scrollIntoView({behavior:'smooth'})},100)">View Dashboard Preview →</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-login">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('login')">×</button>
+    <h2>Welcome back</h2>
+    <p>Sign in to your NutriTrack AI account</p>
+    <button style="width:100%;padding:.7rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:var(--font-body);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.25rem;font-weight:500" onclick="showToast('Google login coming soon!')">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <div style="text-align:center;font-size:.8rem;color:var(--muted);margin-bottom:1.25rem">or sign in with email</div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="priya@example.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" placeholder="••••••••"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('login');showToast('Welcome back, Priya! 👋')">Sign In</button>
+    </div>
+    <p style="text-align:center;margin-top:1rem;font-size:.83rem;color:var(--muted)">Don't have an account? <a href="#" style="color:var(--green);font-weight:500" onclick="closeModal('login');openModal('signup')">Sign up free</a></p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-signup">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('signup')">×</button>
+    <h2>Join NutriTrack AI</h2>
+    <p>Free forever · No credit card needed · 2 minute setup</p>
+    <button style="width:100%;padding:.7rem;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-family:var(--font-body);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;margin-bottom:1.25rem;font-weight:500" onclick="showToast('Google signup coming soon!')">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Sign up with Google
+    </button>
+    <div class="form-group"><label>Full Name</label><input type="text" placeholder="Priya Sharma"></div>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="priya@example.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" placeholder="Create a strong password"></div>
+    <div class="form-group">
+      <label>Your Goal</label>
+      <select>
+        <option>Weight Loss</option>
+        <option>Muscle Gain</option>
+        <option>Diabetes Friendly</option>
+        <option>Keto Mode</option>
+        <option>High Protein</option>
+        <option>Maintain Weight</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" style="flex:1" onclick="closeModal('signup');showToast('Account created! Welcome to NutriTrack AI 🎉')">Create Free Account →</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-addfood">
+  <div class="modal" style="position:relative">
+    <button class="close-btn" onclick="closeModal('addfood')">×</button>
+    <h2>Log Food</h2>
+    <p>Search, scan, or describe what you ate</p>
+    <div class="form-group"><label>Search Food</label><input type="text" id="foodSearch" placeholder="e.g. Idli sambar, Chicken biryani..."></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+      <button class="btn btn-ghost" style="display:flex;align-items:center;gap:.4rem;justify-content:center" onclick="closeModal('addfood');showToast('Camera opened for scanning!')">📷 Scan Barcode</button>
+      <button class="btn btn-ghost" style="display:flex;align-items:center;gap:.4rem;justify-content:center" onclick="closeModal('addfood');showToast('Upload photo with AI detection!')">🖼️ Upload Photo</button>
+    </div>
+    <div class="form-group"><label>Portion Size</label><input type="text" placeholder="e.g. 1 bowl, 200g, 2 pieces"></div>
+    <div class="form-group"><label>Meal</label><select><option>Breakfast</option><option>Lunch</option><option>Snack</option><option selected>Dinner</option></select></div>
+    <button class="btn btn-primary" style="width:100%" onclick="closeModal('addfood');showToast('Food logged successfully! ✅')">Log Food</button>
+  </div>
+</div>
+
+<script>
+// --- PAGES ---
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// --- MODALS ---
+function openModal(id){
+  document.getElementById('modal-'+id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById('modal-'+id).classList.remove('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o){const id=o.id.replace('modal-','');closeModal(id);}});
+});
+
+// --- TOAST ---
+function showToast(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// --- TABS ---
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',['today','week','month'][i]===name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name==='week')renderWeeklyChart();
+  if(name==='month')renderMonthChart();
+}
+
+// --- WATER TRACK ---
+function buildWater(){
+  const w=document.getElementById('waterTrack');
+  if(!w)return;
+  let filled=5;
+  for(let i=0;i<8;i++){
+    const g=document.createElement('div');
+    const h=12+(i%2)*4;
+    g.className='water-glass '+(i<filled?'filled':'empty');
+    g.style.height=h+'px';
+    g.addEventListener('click',()=>{
+      filled=i<filled?i:i+1;
+      document.querySelectorAll('.water-glass').forEach((el,j)=>el.className='water-glass '+(j<filled?'filled':'empty'));
+      showToast(filled+' / 8 glasses logged 💧');
+    });
+    w.appendChild(g);
+  }
+}
+
+// --- STREAK ---
+function buildStreak(){
+  const s=document.getElementById('streakRow');
+  if(!s)return;
+  for(let i=0;i<21;i++){
+    const d=document.createElement('div');
+    d.className='streak-day'+(i<12?' active':'')+(i===11?' today':'');
+    s.appendChild(d);
+  }
+}
+
+// --- CHARTS ---
+let chartsInit=false;
+function initCharts(){
+  if(chartsInit)return;chartsInit=true;
+  // Calorie hourly
+  const ctx1=document.getElementById('calorieChart');
+  if(ctx1)new Chart(ctx1,{type:'bar',data:{labels:['7am','9am','11am','1pm','3pm','5pm','7pm','9pm'],datasets:[{data:[210,0,0,480,155,0,439,0],backgroundColor:ctx=>{const v=ctx.raw;return v>400?'#ef4444':v>200?'#f59e0b':'#1a9e5c'},borderRadius:6,borderSkipped:false}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f0f0'},ticks:{callback:v=>v+'kcal'}}}}});
+  
+  // Macros doughnut
+  const ctx2=document.getElementById('macroChart');
+  if(ctx2)new Chart(ctx2,{type:'doughnut',data:{labels:['Protein','Carbs','Fat'],datasets:[{data:[72,165,38],backgroundColor:['#3b82f6','#f59e0b','#ef4444'],borderWidth:0,borderRadius:4}]},options:{cutout:'70%',plugins:{legend:{display:false}}}});
+
+  buildWater();
+  buildStreak();
+  renderAI();
+}
+
+function renderWeeklyChart(){
+  const ctx=document.getElementById('weeklyChart');
+  if(!ctx||ctx._chartInit)return;ctx._chartInit=true;
+  new Chart(ctx,{type:'bar',data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Calories',data:[1980,2100,1750,2200,1900,2400,1600],backgroundColor:'#1a9e5c',borderRadius:6,borderSkipped:false},{label:'Goal',data:[2100,2100,2100,2100,2100,2100,2100],type:'line',borderColor:'#f59e0b',borderDash:[4,4],pointRadius:0,fill:false}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12}}},scales:{x:{grid:{display:false}},y:{grid:{color:'#f0f0f0'}}}}});
+}
+
+function renderMonthChart(){
+  const ctx=document.getElementById('monthChart');
+  if(!ctx||ctx._chartInit)return;ctx._chartInit=true;
+  const labels=Array.from({length:30},(_,i)=>i+1+'');
+  const data=labels.map(()=>Math.floor(Math.random()*30+20));
+  new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Sugar (g)',data,borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.08)',fill:true,tension:.4,pointRadius:2}]},options:{plugins:{legend:{position:'bottom',labels:{boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:7}},y:{grid:{color:'#f0f0f0'},ticks:{callback:v=>v+'g'}}}}});
+}
+
+// --- AI MESSAGES ---
+async function renderAI(){
+  const el=document.getElementById('aiTyping');
+  if(!el)return;
+  await new Promise(r=>setTimeout(r,1800));
+  el.innerHTML="For a <b>500 kcal dinner</b>, try: Dal khichdi (320 kcal) + Raita + Mixed sabzi. Quick, filling, and high protein! 🥗";
+}
+
+async function sendAIMessage(){
+  const inp=document.getElementById('aiInput');
+  const msgs=document.getElementById('aiMessages');
+  if(!inp||!msgs||!inp.value.trim())return;
+  const userMsg=inp.value.trim();inp.value='';
+  const userBubble=document.createElement('div');
+  userBubble.className='msg msg-user';userBubble.textContent=userMsg;msgs.appendChild(userBubble);
+  const aiBubble=document.createElement('div');
+  aiBubble.className='msg msg-ai';aiBubble.innerHTML='<span class="loading"></span> Thinking...';msgs.appendChild(aiBubble);
+  msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:180,system:'You are NutriAI, a friendly Indian nutrition assistant. Give concise, practical advice about Indian food, calories, and health in 2-3 sentences max. Use emojis naturally.',messages:[{role:'user',content:userMsg}]})});
+    const d=await res.json();
+    aiBubble.innerHTML=d.content?.[0]?.text||'Great question! I\'d love to help with your nutrition goals. 🥗';
+  }catch{aiBubble.innerHTML="I'm here to help! Try asking about Indian foods, calorie goals, or meal suggestions. 🥘";}
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+
+const indianFoods=[
+  {emoji:'🥞',name:'Masala Dosa',cal:210,protein:5,carb:32,fat:6,desc:'South Indian crispy crepe with spiced potato filling'},
+  {emoji:'🍚',name:'Idli (2 pcs)',cal:130,protein:4,carb:26,fat:1,desc:'Steamed rice & lentil cakes'},
+  {emoji:'🍛',name:'Chicken Biryani',cal:520,protein:28,carb:58,fat:18,desc:'Fragrant basmati rice with spiced chicken'},
+  {emoji:'🫓',name:'Chapati',cal:105,protein:3,carb:20,fat:2,desc:'Whole wheat Indian flatbread'},
+  {emoji:'🥘',name:'Dal Tadka',cal:180,protein:10,carb:22,fat:5,desc:'Yellow lentils tempered with spices'},
+  {emoji:'🍜',name:'Upma',cal:165,protein:4,carb:28,fat:4,desc:'Semolina breakfast dish'},
+  {emoji:'🥣',name:'Poha',cal:145,protein:3,carb:28,fat:3,desc:'Flattened rice with vegetables'},
+  {emoji:'🫕',name:'Rajma Chawal',cal:440,protein:16,carb:72,fat:7,desc:'Kidney beans curry with rice'},
+
+  // NEW ITEMS
+  {emoji:'🍗',name:'Butter Chicken',cal:490,protein:30,carb:12,fat:34,desc:'Creamy tomato chicken curry'},
+  {emoji:'🥬',name:'Palak Paneer',cal:320,protein:15,carb:10,fat:22,desc:'Spinach curry with paneer cubes'},
+  {emoji:'🍲',name:'Sambar Rice',cal:280,protein:9,carb:46,fat:6,desc:'Rice mixed with spicy lentil curry'},
+  {emoji:'🥟',name:'Veg Momos',cal:220,protein:6,carb:32,fat:7,desc:'Steamed vegetable dumplings'},
+  {emoji:'🍔',name:'Vada Pav',cal:290,protein:7,carb:36,fat:12,desc:'Mumbai style spicy potato burger'},
+  {emoji:'🌮',name:'Paneer Roll',cal:340,protein:14,carb:30,fat:16,desc:'Indian wrap stuffed with paneer'},
+  {emoji:'🍝',name:'Hakka Noodles',cal:410,protein:8,carb:62,fat:14,desc:'Indo-Chinese stir fried noodles'},
+  {emoji:'🍕',name:'Paneer Pizza',cal:560,protein:18,carb:58,fat:26,desc:'Cheesy Indian style pizza'},
+  {emoji:'🥪',name:'Veg Sandwich',cal:240,protein:8,carb:30,fat:9,desc:'Healthy vegetable sandwich'},
+  {emoji:'🍨',name:'Gulab Jamun',cal:175,protein:2,carb:28,fat:6,desc:'Classic Indian sweet dessert'},
+  {emoji:'🥤',name:'Mango Lassi',cal:190,protein:5,carb:30,fat:5,desc:'Sweet yogurt mango drink'},
+  {emoji:'🍌',name:'Banana Shake',cal:260,protein:7,carb:42,fat:6,desc:'Protein rich banana milkshake'},
+  {emoji:'🥗',name:'Sprouts Salad',cal:120,protein:9,carb:14,fat:3,desc:'Healthy mixed sprouts salad'},
+  {emoji:'🍳',name:'Boiled Eggs (2)',cal:140,protein:12,carb:1,fat:10,desc:'High protein breakfast option'},
+  {emoji:'🥛',name:'Paneer Bhurji',cal:310,protein:18,carb:8,fat:22,desc:'Scrambled paneer with spices'},
+  {emoji:'🍖',name:'Tandoori Chicken',cal:360,protein:35,carb:5,fat:20,desc:'Grilled spicy chicken'},
+  {emoji:'🍠',name:'Sweet Corn Chat',cal:170,protein:5,carb:28,fat:4,desc:'Indian street style corn snack'},
+  {emoji:'🍤',name:'Fish Curry',cal:330,protein:26,carb:8,fat:20,desc:'Traditional spicy fish curry'},
+  {emoji:'🥔',name:'Aloo Paratha',cal:320,protein:7,carb:42,fat:12,desc:'Stuffed potato flatbread'},
+  {emoji:'🧆',name:'Chole Bhature',cal:620,protein:16,carb:78,fat:28,desc:'Punjabi chickpea curry with fried bread'}
+];
+
+
+
+
+let selectedFood=0;
+function buildIndianFoods(){
+  const c=document.getElementById('foodCarousel');
+  if(!c)return;
+  indianFoods.forEach((f,i)=>{
+    const chip=document.createElement('div');
+    chip.className='food-chip';
+    chip.innerHTML=`<div class="food-chip-emoji">${f.emoji}</div><div class="food-chip-name">${f.name}</div><div class="food-chip-cal">${f.cal} kcal</div>`;
+    chip.addEventListener('click',()=>selectFood(i));
+    c.appendChild(chip);
+  });
+  selectFood(0);
+}
+
+function selectFood(i){
+  selectedFood=i;
+  const f=indianFoods[i];
+  const d=document.getElementById('foodDetail');
+  if(!d)return;
+  const total=f.protein+f.carb+f.fat;
+  d.innerHTML=`
+    <div class="food-detail-header">
+      <div class="food-detail-emoji">${f.emoji}</div>
+      <div><div class="food-detail-name">${f.name}</div><div class="food-detail-cal">${f.cal} kcal per serving · ${f.desc}</div></div>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="showToast('${f.name} logged!')">+ Log</button>
+    </div>
+    <div class="macros-bar">
+      <div class="macro-bar-protein" style="width:${Math.round(f.protein/total*100)}%"></div>
+      <div class="macro-bar-carb" style="width:${Math.round(f.carb/total*100)}%"></div>
+      <div class="macro-bar-fat" style="width:${Math.round(f.fat/total*100)}%"></div>
+    </div>
+    <div class="macro-labels">
+      <span class="macro-label"><div class="macro-dot" style="background:var(--blue)"></div>Protein ${f.protein}g (${Math.round(f.protein/total*100)}%)</span>
+      <span class="macro-label"><div class="macro-dot" style="background:var(--amber)"></div>Carbs ${f.carb}g (${Math.round(f.carb/total*100)}%)</span>
+      <span class="macro-label"><div class="macro-dot" style="background:var(--red)"></div>Fat ${f.fat}g (${Math.round(f.fat/total*100)}%)</span>
+    </div>`;
+}
+
+function showAddFood(){
+  openModal('addfood');
+}
+
+function smoothScroll(id){
+  const element = document.getElementById(id);
+  
+  if(element){
+    element.scrollIntoView({
+      behavior: 'smooth'
+    });
+  }
+}
+
+document.getElementById('aiInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendAIMessage();});
+buildIndianFoods();
+window.addEventListener('load',()=>{
+  initCharts();
+  setTimeout(()=>showToast('NutriTrack AI loaded 🥗 Scroll to explore!'),1200);
+});
+
+// Observe dashboard preview to init charts
+const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)initCharts();})},{threshold:.1});
+const preview=document.getElementById('dashboard-preview');
+if(preview)obs.observe(preview);
+</script>
+</body>
+</html>
